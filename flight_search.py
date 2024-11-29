@@ -10,13 +10,14 @@ __author__ = "Nelsandro"
 __version__ = "0.1"
 
 import requests
+import json
 import datetime as dt
 from dateutil.relativedelta import relativedelta
 
 
 class FlightSearch:
     def __init__(self, amadeus_api_key: str, amadeus_api_key_secret: str, amadeus_base_end_point: str,
-                 base_city: str):
+                 base_city: str, destinations: dict):
         self.API_KEY = amadeus_api_key
         self.API_SECRET = amadeus_api_key_secret
         self.API_ENDPOINT = amadeus_base_end_point
@@ -29,20 +30,22 @@ class FlightSearch:
         }
         self.BEARER_TOKEN = self.get_access_token()
         self.base_city = base_city
+        self.destinations = destinations
+        self.flight_date = ""
 
     def get_access_token(self):
         response = requests.post(url=self.TOKEN_ENDPOINT, headers=self.token_header, data=self.parameters)
         response.raise_for_status()
         return response.json()["access_token"]
 
-    def get_flight_details(self, price: int, destination="LIS", number_of_offers="3"):
+    def get_flight_details(self, price: int, destination="LIS", number_of_offers="1"):
         today_date = dt.datetime.now().strftime("%Y-%m-%d")
-        six_months_from_now = self._calculate_next_months(today_date)
+        self.flight_date = self._calculate_next_months(today_date)
         authorization = {"Authorization": f"Bearer {self.BEARER_TOKEN}"}
         v2_search_params = {
             "originLocationCode": self.base_city,
             "destinationLocationCode": destination,
-            "departureDate": six_months_from_now,
+            "departureDate": self.flight_date,
             "adults": 1,
             "currencyCode": "EUR",
             "maxPrice": price,
@@ -59,3 +62,11 @@ class FlightSearch:
             return new_date.strftime('%Y-%m-%d')
         except ValueError:
             return "Invalid date format. Please use 'YYYY-MM-DD'."
+
+    def get_flight_details_for_all_cities(self):
+        all_offers = []
+        for google_sheet_destinations in self.destinations['prices']:
+            all_offers.append(self.get_flight_details(price=google_sheet_destinations["lowestPrice"],
+                                                      destination=google_sheet_destinations["iataCode"]))
+        print(all_offers)
+        return all_offers
