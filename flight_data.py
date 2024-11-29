@@ -48,12 +48,16 @@ class FlightData(NotificationManager):
     def compare_prices_and_send_notification(self):
         for offer in self.all_flight_offers_list:
             for desired_destination in self.destination_price_data["prices"]:
-                list_of_stops = offer["data"][0]["itineraries"][0]["segments"]
-                self.final_destination = list_of_stops[len(list_of_stops)-1]["arrival"]["iataCode"]
-                if self.final_destination == desired_destination["iataCode"]:
-                    self.google_sheet_price = desired_destination["lowestPrice"]
-                    current_flight_price = float(offer["data"][0]["price"]["grandTotal"])
-                    if self.google_sheet_price > self.current_flight_price:
-                        self.send_notification(price=current_flight_price,
-                                               date=self.flight_date,
-                                               destination=self.final_destination)
+                try:
+                    list_of_stops = offer["data"][0]["itineraries"][0]["segments"]
+                    self.final_destination = list_of_stops[len(list_of_stops)-1]["arrival"]["iataCode"]
+                    if self.final_destination == desired_destination["iataCode"]:
+                        self.google_sheet_price = desired_destination["lowestPrice"]
+                        current_flight_price = float(offer["data"][0]["price"]["grandTotal"])
+                        if self.google_sheet_price > self.current_flight_price:
+                            self.send_notification(price=current_flight_price,
+                                                   date=self.flight_date,
+                                                   destination=self.final_destination)
+                except IndexError as e:
+                    print(f"No offers were found problably: {e}")
+
