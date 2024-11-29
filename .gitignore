@@ -9,3 +9,4 @@
 *.wpd
 *.wps
 variables.py
+*.json
