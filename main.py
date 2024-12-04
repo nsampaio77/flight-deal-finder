@@ -5,6 +5,7 @@ main.py
 An app with the goal to e-mail you automatically, with information about flight deals
 
 """
+import requests
 from data_manager import DataManager
 from flight_data import FlightData
 from notification_manager import NotificationManager
@@ -25,3 +26,4 @@ flight_manager = FlightData(sender=GMAIL_ACCOUNT_SENDER,
                             pass__=GMAIL_ACCOUNT_PASS,
                             destination_price=destination_and_prices)
 flight_manager.compare_prices_and_send_notification()
+d_manager.update_new_lowest_price_on_google_sheet(new_google_sheet=flight_manager.destination_price_data)

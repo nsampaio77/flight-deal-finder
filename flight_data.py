@@ -41,7 +41,6 @@ class FlightData(NotificationManager):
         self.destination_price_data = destination_price
         self.flight_date = self.f_searcher.flight_date
         self.google_sheet_price = 0
-        self.current_flight_price = 0
         self.final_destination = ""
 
 
@@ -54,10 +53,12 @@ class FlightData(NotificationManager):
                     if self.final_destination == desired_destination["iataCode"]:
                         self.google_sheet_price = desired_destination["lowestPrice"]
                         current_flight_price = float(offer["data"][0]["price"]["grandTotal"])
-                        if self.google_sheet_price > self.current_flight_price:
+                        if self.google_sheet_price > current_flight_price:
                             self.send_notification(price=current_flight_price,
                                                    date=self.flight_date,
                                                    destination=self.final_destination)
+                            desired_destination["lowestPrice"] = current_flight_price
                 except IndexError as e:
-                    print(f"No offers were found problably: {e}")
+                    print(f"No offers were found probably: {e}")
+
 

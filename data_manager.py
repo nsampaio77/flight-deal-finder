@@ -24,6 +24,15 @@ class DataManager:
         response.raise_for_status()
         return response.json()
 
-    def update_new_lowest_price(self, destination, price):
-        # TODO: Add implementation allowing to update the new lowest prince of the next 6 months"
-        pass
+    def update_new_lowest_price_on_google_sheet(self, new_google_sheet):
+        for row in new_google_sheet['prices']:
+            url = self.API_ENDPOINT + f"/{row['id']}"
+            payload = {"price": row}
+            response = requests.put(url=url, json=payload, headers=self.AUTH)
+            response.raise_for_status()
+            # Raise for status and print response for debugging
+            try:
+                response.raise_for_status()
+                print(f"Updated row {row['id']}: {response.json()}")
+            except requests.exceptions.HTTPError as e:
+                print(f"Error updating row {row['id']}: {e}")
